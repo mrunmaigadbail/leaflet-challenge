@@ -12,11 +12,9 @@ let myMap = L.map("map", {
   const url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
   
   d3.json(url).then(function(response) {
-  
-    //console.log(response);
+
     feature = response.features;
-  
-    //console.log(features);
+
   
     
     let marker_limit = feature.length;
@@ -30,53 +28,68 @@ let myMap = L.map("map", {
         let place = feature[i].properties.place;
         let time = new Date(feature[i].properties.time)
         let popup_text = `<h1>${place}</h1><hr><h5>${time}</h5>`;
-     
-        let fillcolor = "";
-        if ( depth >= -10 && depth <= 10 ) {
-          fillcolor = "#66bd63";
-        }
-        else if (depth >= 10 && depth <= 30 ) {
-          fillcolor = "#d9ef8b";
-        }
-        else if (depth >= 30 && depth <= 50 ) {
-          fillcolor = "#fee08b";
-        }
-
-        else if (depth >= 50 && depth <= 70 ) {
-            fillcolor = "#ff922c";
-          }
-          else if (depth >= 70 && depth <= 90 ) {
-            fillcolor = "#fd673a";
-          }
-        else if (depth >= 90 ){
-          fillcolor = "ec204f";
-        }
-        console.log(magnitude)
+         
         
         L.circle([latitude,longitude], {
-            fillOpacity: 1,
-            weight: 2,
-            //opacity: 1,
-            color:"black",
-            fillColor: fillcolor,
-            radius: magnitude * 10000
+            fillOpacity: 0.75,
+          
+            opacity: 1,
+            color: "black",
+            fillColor: selectColor(depth),
+            radius: radiusCal(magnitude)
           }).bindPopup(popup_text).addTo(myMap);
       }
 })
 
-let legend = L.control({ position: "bottomright" });
-legend.onAdd = function () {
-    let div = L.DomUtil.create('div', 'legend'); 
-       div.innerHTML += '<span>-10-10</span><br>';
-       div.innerHTML += '<span>10 - 30</span><br>';
-       div.innerHTML += '<span>30- 50</span><br>';
-       div.innerHTML += '<span>50-70</span><br>';
-       div.innerHTML += '<span>70 - 90</span><br>';
-       div.innerHTML += '<span>90+</span><br>';
+
+let legends = L.control({ position: "bottomright" })
+legends.onAdd = function () {
+        let div = L.DomUtil.create('div', 'info legend'); 
+
+       div.innerHTML += `<i style='background: #98EE00'></i>-10-10<br/>
+                         <i style='background: #D4EE00'></i>10-30<br/>
+                        <i style='background: #EECC00'></i>30-50<br/>
+                        <i style='background: #EE9C00'></i>50-70<br/>
+                        <i style='background: #EA822C'></i>70-90<br/>
+                        <i style='background: #EA2C2C'></i>90+`;
            
     
     return div;
 };
 
 // Add the legend to the map
-legend.addTo(myMap);
+legends.addTo(myMap);
+
+function selectColor(depth){
+
+    let fillcolor = "black";
+    if ( depth >= -10 && depth <= 10 ) {
+    fillcolor = "#98EE00";
+    }
+    else if (depth >= 10 && depth <= 30 ) {
+    fillcolor = "#D4EE00";
+    }
+    else if (depth >= 30 && depth <= 50 ) {
+    fillcolor = "#EECC00";
+    }
+
+    else if (depth >= 50 && depth <= 70 ) {
+        fillcolor = "#EE9C00";
+    }
+    else if (depth >= 70 && depth <= 90 ) {
+        fillcolor = "#EA822C";
+    }
+    else if (depth >= 90 ){
+    fillcolor = "#EA2C2C";
+    }
+    return fillcolor
+}
+
+function radiusCal(magnitude)
+{
+ 
+    if(magnitude>0){
+        radius = magnitude * 10000
+    }
+    return radius
+}
